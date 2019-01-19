@@ -13,6 +13,9 @@ MQTT_ACC = "accelerometer_data"
 # List of values
 acc_data = []
 
+# Max number of stuff
+num = 0
+
 # Process data function
 def process(data):
     # Accumulators for the different fields
@@ -57,6 +60,9 @@ def on_connect_acc(client, userdata, flags, rc):
 
 # Call back for when a PUBLISH message is received from the server
 def on_message_acc(client, userdata, msg):
+    # Global num?
+    global num
+
     # Print message received (for shits and giggles)
     print(msg.topic + " " + str(msg.payload))
 
@@ -64,10 +70,20 @@ def on_message_acc(client, userdata, msg):
     message = str(msg.payload)
 
     # Process the data
+    if (num >= 5):
+        # Process the message
+        final = process(acc_data)
+        print(num)
+        # Publish to accelerometer topic
+        publish.single(MQTT_PATH, final, hostname = MQTT_SERVER)
 
+        # Reset the list
+        acc_data[:] = []
 
-    # Publish to accelerometer topic
-    publish.single(MQTT_PATH, message, hostname = MQTT_SERVER)
+        # Reset x
+        num = 0
+    else:
+        num += 1
     
 # Accelerometer Client
 client_acc = mqtt.Client()
