@@ -1,0 +1,92 @@
+$light-blue: #5AA3ED; /*light blue*/
+$maroon: #4F000B; /*maroon*/
+$light-green: #4BED81; /*light green*/
+$red: #D81159; /*red*/
+$yellow: #EDDE5A; /*yellow*/
+$navy: #0D2340; /*navy*/
+$light-red: #ED6A5A; /*light red*/
+$dark-gray: #252838;
+$light-gray: #D5DDE1;
+
+$bright-green: #00FF00;
+
+$background-color: $light-green;
+$main-color: $dark-gray;
+$accent-color: $maroon;
+
+body {
+  padding: 10vw;
+  background-color: $background-color;
+  color: $main-color;
+  font-family: monospace;
+}
+
+.columns {
+  display: flex;
+  flex-direction: row;
+}
+
+.image-container {
+  height: 40vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.text-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.messages-wrapper {
+  background-color: $main-color;
+  color: $bright-green;
+  height: 15vh;
+  margin: 1.5vh;
+  padding: 1vw;
+  font-family: monospace;
+}
+.messages {
+  height: 80%;
+  overflow-y: scroll;
+  .hidden {
+    display: none;
+  }
+  p {
+    margin: 4px;
+  }
+}
+
+h3 {
+  margin: 4px;
+}
+
+.button {
+  background-color: $background-color;
+  color: $accent-color;
+  width: 100%;
+  border: none;
+  margin: 1vw;
+  padding: 1vw;
+}
+
+.controls {
+  background-color: $main-color;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  h3 {
+    color: $background-color;
+  }
+  .button-wrapper {
+    display: flex;
+    flex-direction: row;
+    .button {
+      width: 90%;
+      margin: 1.5vh;
+    }
+  }
+}
