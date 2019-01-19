@@ -1,6 +1,9 @@
 import paho.mqtt.publish as publish
+import sys
 
-MQTT_SERVER = "172.30.47.196"
-MQTT_PATH = "sensor_data"
+MQTT_SERVER = "broker.mqttdashboard.com"
+MQTT_PATH = "ideahacks2019_200_text"
 
-publish.single(MQTT_PATH, "Hello World!", hostname = "localhost")
+while True:
+    message = sys.stdin.readline()
+    publish.single(MQTT_PATH, message, hostname = MQTT_SERVER)
