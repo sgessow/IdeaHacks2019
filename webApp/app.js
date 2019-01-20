@@ -6,8 +6,11 @@ var config = {
 }
 var safeGreen = '#4BED81'
 var dangerRed = '#ED6A5A'
+var brightGreen = '#00FF00'
 var counter = 1
 var timeout = 2000
+var listeners = []
+var inDanger = false
 
 class mqtt_guy {
 	constructor(topic) {
@@ -70,24 +73,38 @@ class mqtt_guy {
   on_message(message) {
       //Do something with the push message you received
       console.log("recieved ", message.payloadString, " from ", message.destinationName)
+      var status = ''
+      if(message.payloadString == 0){
+        if(inDanger){
+          danger(false)
+        }
+        status = 'No sweat champ'
+      }
+      else if (message.payloadString == 1){
+        if(!inDanger){
+          danger(true)          
+        }
+        status = "Aw Geez Rick.. Someone's stealing our stuff!"
+      }
+      $(`#messages_${this.id}`).append('<p clas="hidden">' + status + '</p>');
+      let speed = 200/message.payloadString.length
+      typeEffect($(`#messages_${this.id} p`).last(), speed)
+
       try {
-        console.log(JSON.parse(message.payloadString))
+        //console.log(JSON.parse(message.payloadString))
         reconstructBase64String(JSON.parse(message.payloadString))
       } catch (e) {
         //console.log(e)
-        $(`#messages_${this.id}`).append('<p clas="hidden">' + message.payloadString + '</p>');
-        let speed = 666/message.payloadString.length
-        typeEffect($(`#messages_${this.id} p`).last(), speed)
       }
   };
 
   makeInterface() {
     if(this.topic != config.image_topic){
       $('#status-boxes').append(`<div class="messages-wrapper"><h3>${this.topic}:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
-      $('#publishers').append(`<div class='button' id="text-1">I'LL FIGHT YOU</div>
-        <div class='button' id="text-2">ONE DOES NOT SIMPLY SEND DATA OVER WIFI</div>`)
-      document.getElementById("text-1").addEventListener('click', this.publish)
-      document.getElementById("text-2").addEventListener('click', this.publish)
+      // $('#publishers').append(`<div class='button' id="text-1">I'LL FIGHT YOU</div>
+      //   <div class='button' id="text-2">ONE DOES NOT SIMPLY SEND DATA OVER WIFI</div>`)
+      // document.getElementById("text-1").addEventListener('click', this.publish)
+      // document.getElementById("text-2").addEventListener('click', this.publish)
     }
     else {
       //$('#image-container').append(`<div class="messages-wrapper"><h3>Messages:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
@@ -116,7 +133,7 @@ function typeEffect(element, speed) {
 				}, speed);
   $(element).parent().animate({
       scrollTop: $(element).parent()[0].scrollHeight
-    }, 400)
+    }, 200)
 }
 
 $(document).ready(function() {
@@ -125,16 +142,23 @@ $(document).ready(function() {
   var rangefinderListener = new mqtt_guy(config.rangefinder_topic)
   counter += 1;
   var imageListener = new mqtt_guy(config.image_topic)
+  listeners = [accelListener, rangefinderListener, imageListener]
   accelListener.makeInterface();
   rangefinderListener.makeInterface();
   imageListener.makeInterface();
+  document.getElementById('reconnect').addEventListener('click', reconnect)
 })
 
+function reconnect() {
+  for (var index in listeners) {
+    console.log(listeners[index])
+    listeners[index].connect()
+  }
+}
 var pictures = []
 
 function reconstructBase64String(pChunk) {
     //creates a new picture object if receiving a new picture, else adds incoming strings to an existing picture
-    console.log("HERE 1")
     if (pictures[pChunk["pic_id"]]==null) {
         pictures[pChunk["pic_id"]] = {"count":0, "total":pChunk["size"], pieces: {}, "pic_id": pChunk["pic_id"]};
 
@@ -143,12 +167,10 @@ function reconstructBase64String(pChunk) {
     }
 
     else {
-        console.log("HERE")
         pictures[pChunk["pic_id"]].pieces[pChunk["pos"]] = pChunk["data"];
         let pieces =  Object.keys(pictures[pChunk["pic_id"]].pieces).length
         if (pieces == pictures[pChunk["pic_id"]].total) {
           console.log("Image reception compelete");
-          console.log(pictures)
           var str_image="";
 
           for (var i = 1; i <= pictures[pChunk["pic_id"]].total; i++)
@@ -156,11 +178,9 @@ function reconstructBase64String(pChunk) {
 
           //displays image
           //imagebytes = atob(str_image)
-          console.log("got here 2")
           var source = 'data:image/jpg;base64,'+str_image;
           console.log(source)
           var myImageElement = document.getElementById("picture_to_show");
-          console.log(myImageElement)
           myImageElement.setAttribute('class', "thing")
           myImageElement.setAttribute('src', source)
         }
@@ -169,12 +189,15 @@ function reconstructBase64String(pChunk) {
 
 function danger(status) {
   element = document.getElementById('status')
+  inDanger = status
   if(status == true){
     element.innerHTML = "DANGER WILL ROBINSON"
     $('header').css('backgroundColor', dangerRed)
+    $('.messages-wrapper').css('color', dangerRed)
   }
   else {
     element.innerHTML = "Safe and Sound"
     $('header').css('backgroundColor', safeGreen)
+    $('.messages-wrapper').css('color', brightGreen)
   }
 }

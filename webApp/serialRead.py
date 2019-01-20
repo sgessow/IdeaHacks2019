@@ -85,7 +85,7 @@ time.sleep(1)
 
 print("running")
 while ser.isOpen():
-	dataString = ser.read()
+	dataString = ser.readline()
 	print(dataString)
 	dataString = base64.b64encode(dataString)
 	publishEncodedImage(dataString)
