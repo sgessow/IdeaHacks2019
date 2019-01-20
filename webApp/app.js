@@ -194,6 +194,8 @@ function danger(status) {
     element.innerHTML = "DANGER WILL ROBINSON"
     $('header').css('backgroundColor', dangerRed)
     $('.messages-wrapper').css('color', dangerRed)
+    var d = new Date()
+    $('#log').find('.messages').append(`<p>Dangerous event at: ${d}</p>`)
   }
   else {
     element.innerHTML = "Safe and Sound"
