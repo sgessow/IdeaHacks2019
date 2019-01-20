@@ -97,15 +97,24 @@ main {
   h3 {
     margin: 4px;
   }
+  &#log {
+    margin-left: 1vh;
+    margin-right: 1vh;
+    h3 {
+      border-bottom: 2px solid $bright-green;
+    }
+  }
 }
 @media (min-width: $tablet) {
   .messages-wrapper {
-    width: 60%;
+    margin-left: 20vw;
+    margin-right: 20vw;
   }
 }
 @media (min-width: $laptop) {
   .messages-wrapper {
-    width: 40%;
+    margin-left: 30vw;
+    margin-right: 30vw;
   }
 }
 .button {

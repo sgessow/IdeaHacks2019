@@ -82,12 +82,12 @@ class mqtt_guy {
       }
       else if (message.payloadString == 1){
         if(!inDanger){
-          danger(true)          
+          danger(true)
         }
         status = "Aw Geez Rick.. Someone's stealing our stuff!"
       }
       $(`#messages_${this.id}`).append('<p clas="hidden">' + status + '</p>');
-      let speed = 200/message.payloadString.length
+      let speed = 100/message.payloadString.length
       typeEffect($(`#messages_${this.id} p`).last(), speed)
 
       try {
@@ -133,7 +133,7 @@ function typeEffect(element, speed) {
 				}, speed);
   $(element).parent().animate({
       scrollTop: $(element).parent()[0].scrollHeight
-    }, 200)
+    }, 400)
 }
 
 $(document).ready(function() {
