@@ -1,15 +1,17 @@
 var config = {
-  'text_channel': 'ideahacks2019_200_text',
-  //'text_channel': '172.30.47.196',
-  'image_channel': 'ideahacks2019_200_images',
+  'accel_topic': 'ideahacks2019_200_accel',
+  'rangefinder_topic': 'ideahacks2019_200_rangefinder',
+  'image_topic': 'ideahacks2019_200_images',
   'qos': 2
 }
-
+var safeGreen = '#4BED81'
+var dangerRed = '#ED6A5A'
 var counter = 1
+var timeout = 2000
 
 class mqtt_guy {
 	constructor(topic) {
-    this.channel = topic
+    this.topic = topic
     this.connect = this.connect.bind(this)
     this.subscribe = this.subscribe.bind(this)
     this.publish = this.publish.bind(this)
@@ -26,34 +28,31 @@ class mqtt_guy {
         this.connect()
     };
     //Gets called whenever you receive a message for your subscriptions
-    this.client.onMessageArrived = function (message) {
-        //Do something with the push message you received
-        console.log("recieved ", message.payloadString, " from ", message.destinationName)
-        $(`#messages_${this.clientId}`).append('<p clas="hidden">' + message.payloadString + '</p>');
-        let speed = 666/message.payloadString.length
-        typeEffect($(`#messages_${this.clientId} p`).last(), speed)
-    };
+    this.client.onMessageArrived = this.on_message.bind(this)
     //Connect Options
     this.options = {
         timeout: 3,
         //Gets Called if the connection has sucessfully been established
         onSuccess: function () {
             console.log("Connected");
+            return true
         },
         //Gets Called if the connection could not be established
         onFailure: function (message) {
             alert("Connection failed: " + message.errorMessage);
         }
     };
+    //once initialized, connect to server/broker
     this.connect()
   }
-
+  //connect to server/broker thing
   connect() {
     this.client.connect(this.options)
+    setTimeout(this.subscribe, timeout)
   }
-
+  //subscribe to topic, defined in constructor
   subscribe() {
-    this.client.subscribe(this.channel, {qos: config.qos});
+    this.client.subscribe(this.topic, {qos: config.qos});
     console.log('Subscribed');
   }
 
@@ -62,26 +61,40 @@ class mqtt_guy {
     let payload = (evt.target.innerHTML)
     //Send your message (also possible to serialize it as JSON or protobuf or just use a string, no limitations)
     var message = new Messaging.Message(payload);
-    message.destinationName = this.channel;
+    message.destinationName = this.topic;
     message.qos = config.qos;
     this.client.send(message);
-    $(`#input_${this.id}`).val('')
+    //$(`#input_${this.id}`).val('')
   }
 
+  on_message(message) {
+      //Do something with the push message you received
+      console.log("recieved ", message.payloadString, " from ", message.destinationName)
+      try {
+        console.log(JSON.parse(message.payloadString))
+        reconstructBase64String(JSON.parse(message.payloadString))
+      } catch (e) {
+        //console.log(e)
+        $(`#messages_${this.id}`).append('<p clas="hidden">' + message.payloadString + '</p>');
+        let speed = 666/message.payloadString.length
+        typeEffect($(`#messages_${this.id} p`).last(), speed)
+      }
+  };
+
   makeInterface() {
-    if(this.channel == config.text_channel){
-      $('#text-container').append(`<div class="messages-wrapper"><h3>Messages:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
+    if(this.topic != config.image_topic){
+      $('#status-boxes').append(`<div class="messages-wrapper"><h3>${this.topic}:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
       $('#publishers').append(`<div class='button' id="text-1">I'LL FIGHT YOU</div>
         <div class='button' id="text-2">ONE DOES NOT SIMPLY SEND DATA OVER WIFI</div>`)
       document.getElementById("text-1").addEventListener('click', this.publish)
       document.getElementById("text-2").addEventListener('click', this.publish)
     }
     else {
-      $('#image-container').append(`<div class="messages-wrapper"><h3>Messages:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
-      $('#publishers').append(`<div class='button' id="image-1"">THE ONE PERCENT HOLD 99% AND THE 99% HOLD ONE PERCENT </div>
-        <div class='button' id="image-2"">MAKE AMERICA GREAT AGAIN</div>`)
-      document.getElementById("image-1").addEventListener('click', this.publish)
-      document.getElementById("image-2").addEventListener('click', this.publish)
+      //$('#image-container').append(`<div class="messages-wrapper"><h3>Messages:</h3><div class="messages" id="messages_${this.id}"></div></div>`)
+      // $('#publishers').append(`<div class='button' id="image-1"">THE ONE PERCENT HOLD 99% AND THE 99% HOLD ONE PERCENT </div>
+      //   <div class='button' id="image-2"">MAKE AMERICA GREAT AGAIN</div>`)
+      // document.getElementById("image-1").addEventListener('click', this.publish)
+      // document.getElementById("image-2").addEventListener('click', this.publish)
     }
   }
 }
@@ -103,26 +116,25 @@ function typeEffect(element, speed) {
 				}, speed);
   $(element).parent().animate({
       scrollTop: $(element).parent()[0].scrollHeight
-    }, 1000)
+    }, 400)
 }
 
 $(document).ready(function() {
-  var textListener = new mqtt_guy(config.text_channel)
+  var accelListener = new mqtt_guy(config.accel_topic)
   counter += 1;
-  var imageListener = new mqtt_guy(config.image_channel)
-  textListener.makeInterface();
+  var rangefinderListener = new mqtt_guy(config.rangefinder_topic)
+  counter += 1;
+  var imageListener = new mqtt_guy(config.image_topic)
+  accelListener.makeInterface();
+  rangefinderListener.makeInterface();
   imageListener.makeInterface();
-
-  document.getElementById('subscribe').addEventListener('click',function() {
-    textListener.subscribe();
-    imageListener.subscribe();
-  })
 })
 
-function reconstructBase64String(chunk) {
-    pChunk = JSON.parse(chunk["d"]);
+var pictures = []
 
+function reconstructBase64String(pChunk) {
     //creates a new picture object if receiving a new picture, else adds incoming strings to an existing picture
+    console.log("HERE 1")
     if (pictures[pChunk["pic_id"]]==null) {
         pictures[pChunk["pic_id"]] = {"count":0, "total":pChunk["size"], pieces: {}, "pic_id": pChunk["pic_id"]};
 
@@ -131,23 +143,38 @@ function reconstructBase64String(chunk) {
     }
 
     else {
+        console.log("HERE")
         pictures[pChunk["pic_id"]].pieces[pChunk["pos"]] = pChunk["data"];
-        pictures[pChunk["pic_id"]].count += 1;
+        let pieces =  Object.keys(pictures[pChunk["pic_id"]].pieces).length
+        if (pieces == pictures[pChunk["pic_id"]].total) {
+          console.log("Image reception compelete");
+          console.log(pictures)
+          var str_image="";
 
+          for (var i = 1; i <= pictures[pChunk["pic_id"]].total; i++)
+              str_image = str_image + pictures[pChunk["pic_id"]].pieces[i];
 
-        if (pictures[pChunk["pic_id"]].count == pictures[pChunk["pic_id"]].total) {
-        console.log("Image reception compelete");
-        var str_image="";
-
-        for (var i = 0; i <= pictures[pChunk["pic_id"]].total; i++)
-            str_image = str_image + pictures[pChunk["pic_id"]].pieces[i];
-
-        //displays image
-        var source = 'data:image/jpeg;base64,'+str_image;
-        var myImageElement = document.getElementById("picture_to_show");
-        myImageElement.href = source;
+          //displays image
+          //imagebytes = atob(str_image)
+          console.log("got here 2")
+          var source = 'data:image/jpg;base64,'+str_image;
+          console.log(source)
+          var myImageElement = document.getElementById("picture_to_show");
+          console.log(myImageElement)
+          myImageElement.setAttribute('class', "thing")
+          myImageElement.setAttribute('src', source)
         }
-
     }
+}
 
+function danger(status) {
+  element = document.getElementById('status')
+  if(status == true){
+    element.innerHTML = "DANGER WILL ROBINSON"
+    $('header').css('backgroundColor', dangerRed)
+  }
+  else {
+    element.innerHTML = "Safe and Sound"
+    $('header').css('backgroundColor', safeGreen)
+  }
 }

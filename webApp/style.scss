@@ -12,18 +12,110 @@ $bright-green: #00FF00;
 
 $background-color: $light-green;
 $main-color: $dark-gray;
-$accent-color: $maroon;
+$accent-color: $light-gray;
 
-body {
-  padding: 10vw;
-  background-color: $background-color;
-  color: $main-color;
+$tablet: 768px;
+$laptop: 1024px;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  color: $background-color;
+  background-color: $main-color;
   font-family: monospace;
+  overflow-x: hidden;
+  -ms-overflow-style: none;  // IE 10+
+  overflow: -moz-scrollbars-none;  // Firefox
+  &::-webkit-scrollbar {
+    display: none;  // Safari and Chrome
+  }
 }
 
-.columns {
+header {
+  margin: 0;
+  width: 100%;
+  height: 10vh;
   display: flex;
-  flex-direction: row;
+  justify-content: center;
+  vertical-align: middle;
+  background-color: $background-color;
+  color: $main-color;
+  position: sticky;
+  top: 0;
+  opacity: 0.9;
+  z-index: 100;
+}
+
+main {
+  margin: 0;
+  position: absolute;
+  top: 10vh;
+  left: 0;
+  width: 100vw;
+  min-height: 94vh;
+  background-image: url('images/main.jpg');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+#status-boxes {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.messages-wrapper {
+  position: relative;
+  display: block;
+  background-color: $main-color;
+  color: $bright-green;
+  opacity: 0.9;
+  height: 25vh;
+  margin: 5vh;
+  padding: 1vh;
+  font-family: monospace;
+  .messages {
+    height: 80%;
+    overflow-y: scroll;
+    -ms-overflow-style: none;  // IE 10+
+    overflow: -moz-scrollbars-none;  // Firefox
+    &::-webkit-scrollbar {
+      display: none;  // Safari and Chrome
+    }
+    .hidden {
+      display: none;
+    }
+    p {
+      opacity: 1.0;
+      margin: 4px;
+    }
+  }
+  h3 {
+    margin: 4px;
+  }
+}
+@media (min-width: $tablet) {
+  .messages-wrapper {
+    width: 60%;
+  }
+}
+@media (min-width: $laptop) {
+  .messages-wrapper {
+    width: 40%;
+  }
+}
+.button {
+  background-color: $main-color;
+  color: $accent-color;
+  width: 100%;
+  border: none;
+  margin: 1vw;
+  padding: 1vw;
+  text-align: center;
 }
 
 .image-container {
@@ -34,44 +126,6 @@ body {
   justify-content: center;
 }
 
-.text-container {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.messages-wrapper {
-  background-color: $main-color;
-  color: $bright-green;
-  height: 15vh;
-  margin: 1.5vh;
-  padding: 1vw;
-  font-family: monospace;
-}
-.messages {
-  height: 80%;
-  overflow-y: scroll;
-  .hidden {
-    display: none;
-  }
-  p {
-    margin: 4px;
-  }
-}
-
-h3 {
-  margin: 4px;
-}
-
-.button {
-  background-color: $background-color;
-  color: $accent-color;
-  width: 100%;
-  border: none;
-  margin: 1vw;
-  padding: 1vw;
-}
 
 .controls {
   background-color: $main-color;
@@ -89,4 +143,9 @@ h3 {
       margin: 1.5vh;
     }
   }
+}
+
+.thing {
+  height: 40vh;
+  width: auto;
 }
