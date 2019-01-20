@@ -5,7 +5,7 @@ import sys
 # Create general variables
 MQTT_SERVER = "broker.mqttdashboard.com"
 LOCALHOST = "localhost"
-MQTT_PATH = "ideahacks2019_200_text"
+MQTT_PATH = "ideahacks2019_200_accel"
 
 # Accelerometer topic
 MQTT_ACC = "accelerometer_data"
@@ -68,9 +68,9 @@ def process(data):
     # Now check to see if the average is bigger than some slop
     if (base > max_base):
         if (abs(base_x - acc_x) > 20 or abs(base_y - acc_y) > 20 or abs(base_z - acc_z) > 20):
-            return "YOUR ITEM IS BEING STOLEN BITTTCHCHH"
+            return 1
         else:
-            return "YOU'RE GOOD DOOGGGGG"
+            return 0
 
 # Callback when a CONNACK response is received from the server
 def on_connect_acc(client, userdata, flags, rc):

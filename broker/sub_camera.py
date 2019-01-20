@@ -1,11 +1,18 @@
 import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
+import serial
 import sys
+
+# Open port
+ser = serial.Serial('/dev/ttyUSB0', 115200)
+sys.stdout = open('file.RAW', 'w')
+print(ser.readline())
+sys.stdout.close()
 
 # Create general variables
 MQTT_SERVER = "broker.mqttdashboard.com"
 LOCALHOST = "localhost"
-MQTT_PATH = "ideahacks2019_200_rangefinder"
+MQTT_PATH = "ideahacks2019_200_text"
 
 # Rangefinder topic
 MQTT_RANGE = "rangefinder_data"
@@ -22,9 +29,9 @@ def process(data):
 
     # Now check to see if the average is bigger than some slop
     if (distance < 50):
-        return 1
+        return "YOUR ITEM IS BEING STOLEN BITTTCHCHH"
     else:
-        return 0
+        return "YOU'RE GOOD DOOGGGGG"
 
 # Callback when a CONNACK response is received from the server
 def on_connect_range(client, userdata, flags, rc):
