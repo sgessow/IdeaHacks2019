@@ -10,6 +10,9 @@ MQTT_PATH = "ideahacks2019_200_rangefinder"
 # Rangefinder topic
 MQTT_RANGE = "rangefinder_data"
 
+# Global num
+num = 0
+
 # Process data function
 def process(data):
     # Accumulators for the different fields
@@ -35,8 +38,9 @@ def on_connect_range(client, userdata, flags, rc):
 
 # Call back for when a PUBLISH message is received from the server
 def on_message_range(client, userdata, msg):
+    global num
     # Print message received
-    print(msg.topic + " " + str(msg.payload))
+    #print(msg.topic + " " + str(msg.payload))
 
     # Local message variable
     message = str(msg.payload)
@@ -44,8 +48,12 @@ def on_message_range(client, userdata, msg):
     # Process data
     final = process(message)
 
-    # Publish the message
-    publish.single(MQTT_PATH, final, hostname = MQTT_SERVER)
+    if (final == 1 or num >= 20):
+        # Publish the message
+        publish.single(MQTT_PATH, final, hostname = MQTT_SERVER)
+        num = 0
+    else:
+        num += 1
 
 # Accelerometer Client
 client_range = mqtt.Client()
