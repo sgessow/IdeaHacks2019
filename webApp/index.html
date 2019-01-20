@@ -9,24 +9,26 @@
     <link rel="stylesheet" href="style.min.css" type="text/css">
   </head>
   <body>
-    <div class="page-wrapper">
-      <header>
-        <h1>DANGER WILL ROBINSON</h1>
-      </header>
-      <main>
-        <div class="controls">
-          <h3>CONTROLS</h3>
-          <div class="button-wrapper">
-            <div id="publishers"></div>
-            <div class="button" id='subscribe'>CLICK TO DIE</div>
-          </div>
+    <header>
+      <h1 id="status">Safe and Sound</h1>
+    </header>
+    <main>
+      <div id="status-boxes"></div>
+      <div id="update" class="button">Update</div>
+      <div id="image-container"></div>
+      <div class="controls">
+        <h3>CONTROLS</h3>
+        <div class="button-wrapper">
+          <div id="publishers"></div>
         </div>
+      </div>
 
-        <div id="image-container"></div>
-        <div id="text-container"></div>
+      <div id="image-container">
+        <img id="picture_to_show">
+      </div>
+      <!--<div id="text-container"></div> -->
 
-        <script type="text/javascript" src="app.js"></script>
-      </main>
-    </div>
+      <script type="text/javascript" src="app.js"></script>
+    </main>
   </body>
 </html>
