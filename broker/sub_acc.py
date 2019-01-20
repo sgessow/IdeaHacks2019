@@ -67,9 +67,6 @@ def process(data):
 
     # Now check to see if the average is bigger than some slop
     if (base > max_base):
-        print(abs(base_x - acc_x))
-        print(abs(base_y - acc_y))
-        print(abs(base_z - acc_z))
         if (abs(base_x - acc_x) > 20 or abs(base_y - acc_y) > 20 or abs(base_z - acc_z) > 20):
             return "YOUR ITEM IS BEING STOLEN BITTTCHCHH"
         else:
