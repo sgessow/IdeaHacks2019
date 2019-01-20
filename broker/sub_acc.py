@@ -16,8 +16,18 @@ acc_data = []
 # Max number of stuff
 num = 0
 
+# Baseline numbers
+base = 0
+max_base = 10
+base_x = 0
+base_y = 0
+base_z = 0
+
 # Process data function
 def process(data):
+    # Set global variables
+    global base, max_base, base_x, base_y, base_z
+
     # Accumulators for the different fields
     acc_x = 0
     acc_y = 0
@@ -26,30 +36,44 @@ def process(data):
     # loop through the couple of values in the list
     for s in data:
         # Accumulate for x
-        start = s.rfind("x:")
-        end = s.rfind(",", start)
-        acc_x += int(s[start:end])
+        start = s.find("x:")
+        end = s.find(",", start)
+        if (base < max_base):
+            base_x += int(s[start+2:end])
+        else:
+            acc_x += int(s[start+2:end])
 
         # Accumulate for y
-        start = s.rfind("y:")
-        end = s.rfind(",", start)
-        acc_x += int(s[start:end])
+        start = s.find("y:")
+        end = s.find(",", start)
+        if (base < max_base):
+            base_y += int(s[start+2:end])
+        else:
+            acc_y += int(s[start+2:end])
 
         # Accumulate for y
-        start = s.rfind("z:")
-        end = s.rfind(",", start)
-        acc_x += int(s[start:end])
+        start = s.find("z:")
+        end = s.find(",", start)
+        if (base < max_base):
+            base_z += int(s[start+2:end])
+        else:
+            acc_z += int(s[start+2:end])
 
     # Now average it out with the number of data points
-    acc_x /= len(s)
-    acc_y /= len(s)
-    acc_z /= len(s)
+    if (base > max_base):
+        acc_x /= len(data)
+        acc_y /= len(data)
+        acc_z /= len(data)
 
     # Now check to see if the average is bigger than some slop
-    if (acc_x > 100 or acc_y > 100 or acc_y > 100):
-        return "YOUR ITEM IS BEING STOLEN BITTTCHCHH"
-    else:
-        return "YOU'RE GOOD DOOGGGGG"
+    if (base > max_base):
+        print(abs(base_x - acc_x))
+        print(abs(base_y - acc_y))
+        print(abs(base_z - acc_z))
+        if (abs(base_x - acc_x) > 20 or abs(base_y - acc_y) > 20 or abs(base_z - acc_z) > 20):
+            return "YOUR ITEM IS BEING STOLEN BITTTCHCHH"
+        else:
+            return "YOU'RE GOOD DOOGGGGG"
 
 # Callback when a CONNACK response is received from the server
 def on_connect_acc(client, userdata, flags, rc):
@@ -61,7 +85,7 @@ def on_connect_acc(client, userdata, flags, rc):
 # Call back for when a PUBLISH message is received from the server
 def on_message_acc(client, userdata, msg):
     # Global num?
-    global num
+    global num, base, max_base, base_x, base_y, base_z
 
     # Print message received (for shits and giggles)
     print(msg.topic + " " + str(msg.payload))
@@ -69,21 +93,40 @@ def on_message_acc(client, userdata, msg):
     # Local message variable
     message = str(msg.payload)
 
-    # Process the data
-    if (num >= 5):
-        # Process the message
-        final = process(acc_data)
-        print(num)
-        # Publish to accelerometer topic
-        publish.single(MQTT_PATH, final, hostname = MQTT_SERVER)
+    # Establish baseline
+    if (base < max_base):
+        # Append data
+        acc_data.append(message)
 
-        # Reset the list
+        # Call process
+        process(acc_data)
+
+        # Reset data
         acc_data[:] = []
-
-        # Reset x
-        num = 0
+    elif (base == max_base):
+        base_x /= max_base
+        base_y /= max_base
+        base_z /= max_base
     else:
-        num += 1
+        # Now normal loop
+        if (num >= 5):
+            # Process the message
+            final = process(acc_data)
+            # Publish to accelerometer topic
+            publish.single(MQTT_PATH, final, hostname = MQTT_SERVER)
+
+            # Reset the list
+            acc_data[:] = []
+
+            # Reset x
+            num = 0
+        else:
+            # Append the data
+            acc_data.append(message)
+            num += 1
+
+    # Increase base
+    base += 1
     
 # Accelerometer Client
 client_acc = mqtt.Client()
